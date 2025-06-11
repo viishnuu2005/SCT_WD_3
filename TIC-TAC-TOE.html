@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #eee;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: 100px 100px 100px;
+      gap: 5px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      font-size: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid black;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Tic Tac Toe</h2>
+
+  <div>
+    <input type="radio" name="mode" value="pvp" checked> Player vs Player
+    <input type="radio" name="mode" value="cpu"> Player vs Computer
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <p id="status">Player X's turn</p>
+  <button onclick="startGame()">Restart Game</button>
+
+  <script>
+    var board = ["", "", "", "", "", "", "", "", ""];
+    var currentPlayer = "X";
+    var gameOver = false;
+    var mode = "pvp";
+
+    function startGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameOver = false;
+      document.getElementById("status").innerText = "Player X's turn";
+      drawBoard();
+      var radios = document.getElementsByName("mode");
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+          mode = radios[i].value;
+        }
+      }
+    }
+
+    function drawBoard() {
+      var boardDiv = document.getElementById("board");
+      boardDiv.innerHTML = "";
+      for (var i = 0; i < 9; i++) {
+        var cell = document.createElement("div");
+        cell.className = "cell";
+        cell.innerText = board[i];
+        cell.onclick = (function(index) {
+          return function() {
+            handleClick(index);
+          };
+        })(i);
+        boardDiv.appendChild(cell);
+      }
+    }
+
+    function handleClick(i) {
+      if (board[i] !== "" || gameOver) {
+        return;
+      }
+
+      board[i] = currentPlayer;
+      drawBoard();
+
+      if (checkWinner(currentPlayer)) {
+        document.getElementById("status").innerText = currentPlayer + " wins!";
+        gameOver = true;
+        return;
+      }
+
+      if (isDraw()) {
+        document.getElementById("status").innerText = "It's a draw!";
+        gameOver = true;
+        return;
+      }
+
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      document.getElementById("status").innerText = "Player " + currentPlayer + "'s turn";
+
+      if (currentPlayer === "O" && mode === "cpu") {
+        setTimeout(cpuMove, 400);
+      }
+    }
+
+    function cpuMove() {
+      if (gameOver) return;
+      var empty = [];
+      for (var i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          empty.push(i);
+        }
+      }
+      if (empty.length > 0) {
+        var randomIndex = empty[Math.floor(Math.random() * empty.length)];
+        handleClick(randomIndex);
+      }
+    }
+
+    function checkWinner(p) {
+      var winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+      for (var j = 0; j < winPatterns.length; j++) {
+        var pattern = winPatterns[j];
+        if (board[pattern[0]] === p && board[pattern[1]] === p && board[pattern[2]] === p) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isDraw() {
+      for (var k = 0; k < 9; k++) {
+        if (board[k] === "") {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    startGame(); // initial call
+  </script>
+
+</body>
+</html>
